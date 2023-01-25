@@ -13,5 +13,7 @@ render = ["bevy/render", "bevy/bevy_asset", "bevy/bevy_winit", "bevy/x11"]
 [dependencies]
 bevy = { version = "0.9.1", default-features = false }
 bytemuck = { version = "1.7.0" }
+flume = "0.10.11"
 image = { version = "0.24", default-features = false, features = [] }
-nokhwa = { version = "0.10.0", features = ["input-native", "output-wgpu"] }
+nokhwa = { version = "0.10.0", features = ["input-native", "output-wgpu", "output-threaded"] }
+

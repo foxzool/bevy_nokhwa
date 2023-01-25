@@ -1,3 +1,4 @@
+use crate::camera::BackgroundCamera;
 use bevy::prelude::*;
 use bevy::render::extract_resource::ExtractResource;
 use bevy::render::render_graph::Node;
@@ -49,8 +50,8 @@ impl Vertex {
     }
 }
 
-#[derive(Deref, DerefMut, Resource, ExtractResource, Clone)]
-pub struct WebcamImage(RgbaImage);
+#[derive(Deref, DerefMut, Default, Resource, ExtractResource, Clone)]
+pub struct BackgroundImage(pub RgbaImage);
 
 const VERTICES: &[Vertex] = &[
     Vertex {
@@ -210,7 +211,7 @@ impl Node for BackgroundNode {
 
     fn update(&mut self, world: &mut World) {
         self.query.update_archetypes(world);
-        if let Some(img) = world.get_resource::<WebcamImage>() {
+        if let Some(img) = world.get_resource::<BackgroundImage>() {
             let device = world.get_resource::<RenderDevice>().unwrap();
             let queue = world.get_resource::<RenderQueue>().unwrap();
 
@@ -354,5 +355,16 @@ impl Node for BackgroundNode {
         }
 
         Ok(())
+    }
+}
+
+pub fn handle_background_image(
+    cam_query: Query<&mut BackgroundCamera>,
+    mut image: ResMut<BackgroundImage>,
+) {
+    for background_camera in cam_query.iter() {
+        if let Ok(img) = background_camera.rx.try_recv() {
+            image.0 = img
+        }
     }
 }
