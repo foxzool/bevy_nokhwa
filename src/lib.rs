@@ -9,7 +9,7 @@ use bevy::render::render_graph::RenderGraph;
 use bevy::render::RenderApp;
 use image::RgbaImage;
 
-// pub use nokhwa;
+pub use nokhwa;
 
 mod background;
 pub mod camera;
