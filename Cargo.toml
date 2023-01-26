@@ -1,17 +1,23 @@
 [package]
 name = "bevy_nokhwa"
+description = "Nokhwa plugin for the bevy game engine"
+documentation = "https://docs.rs/bevy_nokhwa"
+repository = "https://github.com/foxzool/bevy_nokhwa"
+readme = "README.md"
+keywords = ["camera", "v4l2", "opencv", "vision"]
+categories = ["Multimedia", "Rendering"]
+license = "MIT OR Apache-2.0"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [features]
-default = ["input-native"]
-input-native = ["bevy/render", "bevy/bevy_asset", "bevy/bevy_winit", "bevy/x11", "bevy/png", "nokhwa/input-native"]
-
+default = ["native"]
+native = ["nokhwa/input-native"]
 
 [dependencies]
-bevy = { version = "0.9.1", default-features = false }
+bevy = { version = "0.9.1", default-features = false, features = ["render", "bevy_asset", "bevy_winit", "x11", "png"] }
 bytemuck = { version = "1.7.0" }
 flume = "0.10.11"
 image = { version = "0.24", default-features = false, features = [] }
@@ -21,5 +27,4 @@ nokhwa = { version = "0.10.0", features = ["output-threaded"] }
 [[example]]
 name = "native"
 path = "examples/native.rs"
-
-
+required-features = ["native"]
