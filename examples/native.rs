@@ -31,6 +31,7 @@ fn setup_camera(
             transform: Transform::from_xyz(-2.0, 2.5, 5.0).looking_at(Vec3::ZERO, Vec3::Y),
             ..Default::default()
         })
+        // auto find camera and use highest resolution
         // .insert(BackgroundCamera::auto())
         .insert(BackgroundCamera::new(
             ApiBackend::Auto,
