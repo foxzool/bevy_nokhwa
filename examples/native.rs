@@ -9,7 +9,15 @@ use nokhwa::utils::CameraIndex;
 
 fn main() {
     App::new()
-        .add_plugins(DefaultPlugins)
+        .add_plugins(DefaultPlugins.set(WindowPlugin {
+            window: WindowDescriptor {
+                title: "BevyNokhwa".to_string(),
+                width: 1280.,
+                height: 960.,
+                ..default()
+            },
+            ..default()
+        }))
         .add_plugin(BevyNokhwaPlugin)
         .add_plugin(bevy::diagnostic::FrameTimeDiagnosticsPlugin::default())
         .add_plugin(bevy::diagnostic::LogDiagnosticsPlugin::default())
@@ -46,7 +54,11 @@ fn setup_camera(
     // cube
     commands.spawn(PbrBundle {
         mesh: meshes.add(Mesh::from(shape::Cube { size: 1.0 })),
-        material: materials.add(Color::rgb(0.8, 0.7, 0.6).into()),
+        material: materials.add(StandardMaterial {
+            base_color: Color::SEA_GREEN,
+            unlit: true,
+            ..default()
+        }),
         transform: Transform::from_xyz(0.0, 0.5, 0.0),
         ..default()
     });
