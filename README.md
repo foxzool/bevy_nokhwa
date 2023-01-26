@@ -12,6 +12,8 @@
 
 ---
 
+<img src="https://user-images.githubusercontent.com/217027/214884000-408ee6ce-ba88-4b2e-bb24-8fd7acadee90.png" width="640" height="480">
+
 A bevy plugin using [nokhawa](https://github.com/l1npengtul/nokhwa).
 
 This plugin allows you to render Camera Capture at background.
