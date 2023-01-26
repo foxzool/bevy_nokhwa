@@ -1,5 +1,5 @@
 use bevy::prelude::Component;
-use flume::bounded;
+use flume::unbounded;
 use image::RgbaImage;
 use nokhwa::pixel_format::{RgbAFormat, RgbFormat};
 use nokhwa::utils::{ApiBackend, CameraIndex, RequestedFormat, RequestedFormatType};
@@ -26,7 +26,7 @@ impl BackgroundCamera {
         });
         let cameras = query(api).unwrap();
         cameras.iter().for_each(|cam| println!("{cam:?}",));
-        let (sender, receiver) = bounded(1);
+        let (sender, receiver) = unbounded();
         let first_camera = cameras.first().expect("camera not exist");
 
         let format = RequestedFormat::new::<RgbFormat>(
@@ -40,7 +40,6 @@ impl BackgroundCamera {
 
         let send_fn = move |buffer: nokhwa::Buffer| {
             let image = buffer.decode_image::<RgbAFormat>().unwrap();
-
             let _ = sender.send(image);
         };
 
@@ -52,10 +51,7 @@ impl BackgroundCamera {
             #[allow(clippy::empty_loop)]
             loop {
                 threaded.poll_frame().expect("camera error");
-                // let image = frame.decode_image::<RgbAFormat>().unwrap();
-                // println!("loop");
             }
-            // let _ = sender.send(image);
         });
 
         Self { rx: receiver }

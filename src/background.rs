@@ -350,8 +350,6 @@ impl Node for BackgroundNode {
 
                 render_pass.draw_indexed(0..(INDICES.len() as u32), 0, 0..1);
             }
-
-            // render_pass.draw_indexed(0..self.num_indices, 0, 0..1);
         }
 
         Ok(())
@@ -363,8 +361,8 @@ pub fn handle_background_image(
     mut image: ResMut<BackgroundImage>,
 ) {
     for background_camera in cam_query.iter() {
-        if let Ok(img) = background_camera.rx.try_recv() {
-            image.0 = img
+        while let Some(img) = background_camera.rx.drain().last() {
+            image.0 = img;
         }
     }
 }

@@ -17,10 +17,14 @@ fn main() {
         .run();
 }
 
-fn setup_camera(mut commands: Commands) {
+fn setup_camera(
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+) {
     commands
-        .spawn(Camera2dBundle {
-            camera_2d: Camera2d {
+        .spawn(Camera3dBundle {
+            camera_3d: Camera3d {
                 clear_color: ClearColorConfig::None,
                 ..default()
             },
@@ -37,4 +41,12 @@ fn setup_camera(mut commands: Commands) {
                 30,
             ))),
         ));
+
+    // cube
+    commands.spawn(PbrBundle {
+        mesh: meshes.add(Mesh::from(shape::Cube { size: 1.0 })),
+        material: materials.add(Color::rgb(0.8, 0.7, 0.6).into()),
+        transform: Transform::from_xyz(0.0, 0.5, 0.0),
+        ..default()
+    });
 }

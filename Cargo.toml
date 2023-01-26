@@ -6,8 +6,8 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [features]
-default = ["render"]
-render = ["bevy/render", "bevy/bevy_asset", "bevy/bevy_winit", "bevy/x11"]
+default = ["input-native"]
+input-native = ["bevy/render", "bevy/bevy_asset", "bevy/bevy_winit", "bevy/x11", "bevy/png", "nokhwa/input-native"]
 
 
 [dependencies]
@@ -15,5 +15,11 @@ bevy = { version = "0.9.1", default-features = false }
 bytemuck = { version = "1.7.0" }
 flume = "0.10.11"
 image = { version = "0.24", default-features = false, features = [] }
-nokhwa = { version = "0.10.0", features = ["input-native", "output-wgpu", "output-threaded"] }
+nokhwa = { version = "0.10.0", features = ["input-native", "output-threaded"] }
+
+
+[[example]]
+name = "native"
+path = "examples/native.rs"
+
 
