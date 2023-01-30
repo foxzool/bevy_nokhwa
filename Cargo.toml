@@ -17,14 +17,28 @@ default = ["native"]
 native = ["nokhwa/input-native"]
 
 [dependencies]
+anyhow = "1.0.66"
 bevy = { version = "0.9.1", default-features = false, features = ["render", "bevy_asset", "bevy_winit", "x11", "png"] }
 bytemuck = { version = "1.7.0" }
 flume = "0.10.11"
 image = { version = "0.24", default-features = false, features = [] }
-nokhwa = { version = "0.10.0", features = ["output-threaded"] }
 
+[dev-dependencies]
+bevy_egui = "0.19.0"
+
+
+[target.'cfg(target_os = "linux")'.dependencies]
+nokhwa = { version = "0.10", features = ["input-v4l", "output-threaded"] }
+
+[target.'cfg(target_os = "windows")'.dependencies]
+nokhwa = { version = "0.10", features = ["input-msmf", "output-threaded"] }
 
 [[example]]
 name = "native"
 path = "examples/native.rs"
+required-features = ["native"]
+
+[[example]]
+name = "setting"
+path = "examples/setting.rs"
 required-features = ["native"]

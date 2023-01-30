@@ -41,15 +41,18 @@ fn setup_camera(
         })
         // auto find camera and use highest resolution
         // .insert(BackgroundCamera::auto())
-        .insert(BackgroundCamera::new(
-            ApiBackend::Auto,
-            Some(CameraIndex::Index(0)),
-            Some(RequestedFormatType::Closest(CameraFormat::new(
-                Resolution::new(640, 480),
-                FrameFormat::MJPEG,
-                30,
-            ))),
-        ));
+        .insert(
+            BackgroundCamera::new(
+                ApiBackend::Auto,
+                Some(CameraIndex::Index(0)),
+                Some(RequestedFormatType::Closest(CameraFormat::new(
+                    Resolution::new(640, 480),
+                    FrameFormat::MJPEG,
+                    30,
+                ))),
+            )
+            .unwrap(),
+        );
 
     // cube
     commands.spawn(PbrBundle {

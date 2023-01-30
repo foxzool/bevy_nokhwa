@@ -361,7 +361,7 @@ pub fn handle_background_image(
     mut image: ResMut<BackgroundImage>,
 ) {
     for background_camera in cam_query.iter() {
-        while let Some(img) = background_camera.rx.drain().last() {
+        while let Some(img) = background_camera.image_rx.drain().last() {
             image.0 = img;
         }
     }
