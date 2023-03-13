@@ -85,9 +85,9 @@ pub struct BackgroundPipeline {
 impl FromWorld for BackgroundPipeline {
     fn from_world(world: &mut World) -> Self {
         let device = world.resource::<RenderDevice>();
-        let samples = match world.get_resource::<Msaa>() {
-            None => 4,
-            Some(msaa) => msaa.samples,
+        let msaa = match world.get_resource::<Msaa>() {
+            None => Msaa::Sample4,
+            Some(msaa) => *msaa,
         };
         let shader = device.create_shader_module(ShaderModuleDescriptor {
             label: Some("Webcam Shader"),
@@ -157,7 +157,7 @@ impl FromWorld for BackgroundPipeline {
             },
             depth_stencil: None,
             multisample: MultisampleState {
-                count: samples,
+                count: msaa.samples(),
                 mask: !0,
                 alpha_to_coverage_enabled: false,
             },
@@ -247,6 +247,7 @@ impl Node for BackgroundNode {
                 dimension: TextureDimension::D2,
                 format: TextureFormat::Rgba8UnormSrgb,
                 usage: TextureUsages::TEXTURE_BINDING | TextureUsages::COPY_DST,
+                view_formats: &[],
             });
 
             queue.write_texture(
@@ -339,7 +340,7 @@ impl Node for BackgroundNode {
                 (&self.vertex_buffer, &self.index_buffer)
             {
                 let mut render_pass = render_context
-                    .command_encoder
+                    .command_encoder()
                     .begin_render_pass(&pass_descriptor);
 
                 render_pass.set_pipeline(&pipeline.render_pipeline);

@@ -2,9 +2,8 @@ extern crate core;
 
 use bevy::core_pipeline::clear_color::ClearColorConfig;
 use bevy::prelude::*;
-use bevy::prelude::{Query, ResMut};
-use bevy_egui::EguiPlugin;
-use bevy_egui::{egui, EguiContext};
+use bevy_egui::egui;
+use bevy_egui::{EguiContexts, EguiPlugin};
 use bevy_nokhwa::camera::{BackgroundCamera, CameraOperation};
 use bevy_nokhwa::nokhwa::utils::ApiBackend;
 use bevy_nokhwa::nokhwa::utils::FrameFormat;
@@ -16,12 +15,11 @@ use nokhwa::utils::ControlValueDescription;
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins.set(WindowPlugin {
-            window: WindowDescriptor {
+            primary_window: Some(Window {
                 title: "Setting".to_string(),
-                width: 1280.,
-                height: 960.,
+                resolution: [1280., 960.].into(),
                 ..default()
-            },
+            }),
             ..default()
         }))
         .add_plugin(EguiPlugin)
@@ -57,10 +55,7 @@ fn setup_camera(mut commands: Commands) {
         );
 }
 
-pub fn dashboard(
-    mut egui_context: ResMut<EguiContext>,
-    mut q_camera: Query<&mut BackgroundCamera>,
-) {
+pub fn dashboard(mut egui_context: EguiContexts, mut q_camera: Query<&mut BackgroundCamera>) {
     let mut camera = q_camera.single_mut();
     let known_controls = camera.known_controls.clone();
 

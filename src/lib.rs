@@ -33,24 +33,20 @@ impl Plugin for BevyNokhwaPlugin {
         {
             graph_2d.add_node(BACKGROUND_NODE, background_node_2d);
 
-            graph_2d
-                .add_node_edge(
-                    BACKGROUND_NODE,
-                    core_pipeline::core_2d::graph::node::MAIN_PASS,
-                )
-                .unwrap();
+            graph_2d.add_node_edge(
+                BACKGROUND_NODE,
+                core_pipeline::core_2d::graph::node::MAIN_PASS,
+            );
         }
 
         if let Some(graph_3d) = render_graph.get_sub_graph_mut(core_pipeline::core_3d::graph::NAME)
         {
             graph_3d.add_node(BACKGROUND_NODE, background_node_3d);
 
-            graph_3d
-                .add_node_edge(
-                    BACKGROUND_NODE,
-                    core_pipeline::core_3d::graph::node::MAIN_PASS,
-                )
-                .unwrap();
+            graph_3d.add_node_edge(
+                BACKGROUND_NODE,
+                core_pipeline::core_3d::graph::node::MAIN_PASS,
+            );
         }
     }
 }

@@ -10,12 +10,11 @@ use nokhwa::utils::CameraIndex;
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins.set(WindowPlugin {
-            window: WindowDescriptor {
+            primary_window: Some(Window {
                 title: "BevyNokhwa".to_string(),
-                width: 1280.,
-                height: 960.,
+                resolution: [1280., 960.].into(),
                 ..default()
-            },
+            }),
             ..default()
         }))
         .add_plugin(BevyNokhwaPlugin)
