@@ -17,10 +17,10 @@ fn main() {
             }),
             ..default()
         }))
-        .add_plugin(BevyNokhwaPlugin)
-        .add_plugin(bevy::diagnostic::FrameTimeDiagnosticsPlugin::default())
-        .add_plugin(bevy::diagnostic::LogDiagnosticsPlugin::default())
-        .add_startup_system(setup_camera)
+        .add_plugins(BevyNokhwaPlugin)
+        .add_plugins(bevy::diagnostic::FrameTimeDiagnosticsPlugin::default())
+        .add_plugins(bevy::diagnostic::LogDiagnosticsPlugin::default())
+        .add_systems(Startup, setup_camera)
         .run();
 }
 

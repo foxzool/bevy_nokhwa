@@ -19,7 +19,6 @@ use bevy::render::renderer::{RenderContext, RenderDevice, RenderQueue};
 use bevy::render::texture::BevyDefault;
 use bevy::render::view::{ExtractedView, ViewTarget};
 use image::RgbaImage;
-use std::num::NonZeroU32;
 
 #[repr(C)]
 #[derive(Copy, Clone, Debug, bytemuck::Pod, bytemuck::Zeroable)]
@@ -179,7 +178,7 @@ impl Node for BackgroundPassDriverNode {
         _render_context: &mut RenderContext,
         _world: &World,
     ) -> Result<(), NodeRunError> {
-        graph.run_sub_graph(BACKGROUND_GRAPH, vec![])?;
+        graph.run_sub_graph(BACKGROUND_GRAPH, vec![], Some(graph.view_entity()))?;
 
         Ok(())
     }
@@ -260,8 +259,8 @@ impl Node for BackgroundNode {
                 &img.0,
                 ImageDataLayout {
                     offset: 0,
-                    bytes_per_row: NonZeroU32::new(4 * dimensions.0),
-                    rows_per_image: NonZeroU32::new(dimensions.1),
+                    bytes_per_row: Some(4 * dimensions.0),
+                    rows_per_image: Some(dimensions.1),
                 },
                 size,
             );

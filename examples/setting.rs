@@ -22,10 +22,10 @@ fn main() {
             }),
             ..default()
         }))
-        .add_plugin(EguiPlugin)
-        .add_plugin(BevyNokhwaPlugin)
-        .add_startup_system(setup_camera)
-        .add_system(dashboard)
+        .add_plugins(EguiPlugin)
+        .add_plugins(BevyNokhwaPlugin)
+        .add_systems(Startup, setup_camera)
+        .add_systems(Update, dashboard)
         .run();
 }
 

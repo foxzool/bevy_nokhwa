@@ -19,11 +19,10 @@ pub struct BevyNokhwaPlugin;
 impl Plugin for BevyNokhwaPlugin {
     fn build(&self, app: &mut App) {
         app.insert_resource(BackgroundImage(RgbaImage::new(640, 480)))
-            .add_plugin(ExtractResourcePlugin::<BackgroundImage>::default())
-            .add_system(handle_background_image);
+            .add_plugins(ExtractResourcePlugin::<BackgroundImage>::default())
+            .add_systems(Update, handle_background_image);
 
         let render_app = app.sub_app_mut(RenderApp);
-        render_app.init_resource::<BackgroundPipeline>();
 
         let background_node_2d = BackgroundNode::new(&mut render_app.world);
         let background_node_3d = BackgroundNode::new(&mut render_app.world);
@@ -45,8 +44,13 @@ impl Plugin for BevyNokhwaPlugin {
 
             graph_3d.add_node_edge(
                 BACKGROUND_NODE,
-                core_pipeline::core_3d::graph::node::MAIN_PASS,
+                core_pipeline::core_3d::graph::node::MAIN_TRANSPARENT_PASS,
             );
         }
+    }
+
+    fn finish(&self, app: &mut App) {
+        let render_app = app.sub_app_mut(RenderApp);
+        render_app.init_resource::<BackgroundPipeline>();
     }
 }
