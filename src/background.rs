@@ -4,16 +4,16 @@ use bevy::render::extract_resource::ExtractResource;
 use bevy::render::render_graph::Node;
 use bevy::render::render_graph::{NodeRunError, RenderGraphContext, SlotInfo};
 use bevy::render::render_resource::{
-    AddressMode, BindGroup, BindGroupDescriptor, BindGroupEntry, BindGroupLayoutDescriptor,
-    BindGroupLayoutEntry, BindingResource, BindingType, BlendComponent, BlendState, Buffer,
-    BufferAddress, BufferInitDescriptor, BufferUsages, ColorTargetState, ColorWrites, Extent3d,
-    Face, FilterMode, FrontFace, ImageCopyTexture, ImageDataLayout, IndexFormat, LoadOp,
-    MultisampleState, Operations, Origin3d, PipelineLayoutDescriptor, PolygonMode, PrimitiveState,
-    PrimitiveTopology, RawFragmentState, RawRenderPipelineDescriptor, RawVertexBufferLayout,
-    RawVertexState, RenderPassDescriptor, RenderPipeline, SamplerBindingType, SamplerDescriptor,
-    ShaderModuleDescriptor, ShaderSource, ShaderStages, TextureAspect, TextureDescriptor,
-    TextureDimension, TextureFormat, TextureSampleType, TextureUsages, TextureViewDescriptor,
-    TextureViewDimension, VertexAttribute, VertexFormat, VertexStepMode,
+    AddressMode, BindGroup, BindGroupEntries, BindGroupLayoutDescriptor, BindGroupLayoutEntry,
+    BindingType, BlendComponent, BlendState, Buffer, BufferAddress, BufferInitDescriptor,
+    BufferUsages, ColorTargetState, ColorWrites, Extent3d, Face, FilterMode, FrontFace,
+    ImageCopyTexture, ImageDataLayout, IndexFormat, LoadOp, MultisampleState, Operations, Origin3d,
+    PipelineLayoutDescriptor, PolygonMode, PrimitiveState, PrimitiveTopology, RawFragmentState,
+    RawRenderPipelineDescriptor, RawVertexBufferLayout, RawVertexState, RenderPassDescriptor,
+    RenderPipeline, SamplerBindingType, SamplerDescriptor, ShaderModuleDescriptor, ShaderSource,
+    ShaderStages, TextureAspect, TextureDescriptor, TextureDimension, TextureFormat,
+    TextureSampleType, TextureUsages, TextureViewDescriptor, TextureViewDimension, VertexAttribute,
+    VertexFormat, VertexStepMode,
 };
 use bevy::render::renderer::{RenderContext, RenderDevice, RenderQueue};
 use bevy::render::texture::BevyDefault;
@@ -299,20 +299,11 @@ impl Node for BackgroundNode {
                     label: Some("texture_bind_group_layout"),
                 });
 
-            let diffuse_bind_group = device.create_bind_group(&BindGroupDescriptor {
-                layout: &texture_bind_group_layout,
-                entries: &[
-                    BindGroupEntry {
-                        binding: 0,
-                        resource: BindingResource::TextureView(&view),
-                    },
-                    BindGroupEntry {
-                        binding: 1,
-                        resource: BindingResource::Sampler(&sampler),
-                    },
-                ],
-                label: Some("diffuse_bind_group"),
-            });
+            let diffuse_bind_group = device.create_bind_group(
+                Some("diffuse_bind_group"),
+                &texture_bind_group_layout,
+                &BindGroupEntries::sequential((&view, &sampler)),
+            );
 
             self.diffuse_bind_group = Some(diffuse_bind_group);
         }

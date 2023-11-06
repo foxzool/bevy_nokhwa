@@ -7,7 +7,7 @@ readme = "README.md"
 keywords = ["camera", "v4l2", "opencv", "vision"]
 categories = ["multimedia", "rendering"]
 license = "MIT OR Apache-2.0"
-version = "0.3.0"
+version = "0.4.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -18,14 +18,14 @@ native = ["nokhwa/input-native"]
 
 [dependencies]
 anyhow = "1.0.66"
-bevy = { version = "0.11.0", default-features = false, features = ["bevy_render", "bevy_core_pipeline", "bevy_asset", "bevy_winit", "bevy_pbr", "x11", "png"] }
+bevy = { version = "0.12.0", default-features = false, features = ["bevy_render", "bevy_core_pipeline", "bevy_asset", "bevy_winit", "bevy_pbr", "x11", "png", "tonemapping_luts"] }
 bytemuck = { version = "1.7.0" }
 flume = "0.10.11"
 image = { version = "0.24", default-features = false, features = [] }
 nokhwa = { version = "0.10", features = ["input-native", "output-threaded"] }
 
 [dev-dependencies]
-bevy_egui = "0.20.0"
+bevy_egui = "0.23.0"
 
 
 
