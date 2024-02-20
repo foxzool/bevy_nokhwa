@@ -1,19 +1,18 @@
 use crate::camera::BackgroundCamera;
 use bevy::prelude::*;
 use bevy::render::extract_resource::ExtractResource;
-use bevy::render::render_graph::Node;
+use bevy::render::render_graph::{Node, RenderLabel, RenderSubGraph};
 use bevy::render::render_graph::{NodeRunError, RenderGraphContext, SlotInfo};
 use bevy::render::render_resource::{
-    AddressMode, BindGroup, BindGroupEntries, BindGroupLayoutDescriptor, BindGroupLayoutEntry,
-    BindingType, BlendComponent, BlendState, Buffer, BufferAddress, BufferInitDescriptor,
-    BufferUsages, ColorTargetState, ColorWrites, Extent3d, Face, FilterMode, FrontFace,
-    ImageCopyTexture, ImageDataLayout, IndexFormat, LoadOp, MultisampleState, Operations, Origin3d,
-    PipelineLayoutDescriptor, PolygonMode, PrimitiveState, PrimitiveTopology, RawFragmentState,
-    RawRenderPipelineDescriptor, RawVertexBufferLayout, RawVertexState, RenderPassDescriptor,
-    RenderPipeline, SamplerBindingType, SamplerDescriptor, ShaderModuleDescriptor, ShaderSource,
-    ShaderStages, TextureAspect, TextureDescriptor, TextureDimension, TextureFormat,
-    TextureSampleType, TextureUsages, TextureViewDescriptor, TextureViewDimension, VertexAttribute,
-    VertexFormat, VertexStepMode,
+    AddressMode, BindGroup, BindGroupEntries, BindGroupLayoutEntry, BindingType, BlendComponent,
+    BlendState, Buffer, BufferAddress, BufferInitDescriptor, BufferUsages, ColorTargetState,
+    ColorWrites, Extent3d, Face, FilterMode, FrontFace, ImageCopyTexture, ImageDataLayout,
+    IndexFormat, MultisampleState, Origin3d, PipelineLayoutDescriptor, PolygonMode, PrimitiveState,
+    PrimitiveTopology, RawFragmentState, RawRenderPipelineDescriptor, RawVertexBufferLayout,
+    RawVertexState, RenderPassDescriptor, RenderPipeline, SamplerBindingType, SamplerDescriptor,
+    ShaderModuleDescriptor, ShaderSource, ShaderStages, TextureAspect, TextureDescriptor,
+    TextureDimension, TextureFormat, TextureSampleType, TextureUsages, TextureViewDescriptor,
+    TextureViewDimension, VertexAttribute, VertexFormat, VertexStepMode,
 };
 use bevy::render::renderer::{RenderContext, RenderDevice, RenderQueue};
 use bevy::render::texture::BevyDefault;
@@ -73,8 +72,10 @@ const VERTICES: &[Vertex] = &[
 
 const INDICES: &[u16] = &[0, 1, 2, 2, 1, 3];
 
-const BACKGROUND_GRAPH: &str = "background_graph";
-pub(crate) const BACKGROUND_NODE: &str = "background_node";
+#[derive(Debug, Hash, PartialEq, Eq, Clone, RenderSubGraph)]
+pub struct BackgroundGraph;
+#[derive(Debug, Hash, PartialEq, Eq, Clone, RenderLabel)]
+pub(crate) struct BackgroundNodeLabel;
 
 #[derive(Resource)]
 pub struct BackgroundPipeline {
@@ -93,28 +94,27 @@ impl FromWorld for BackgroundPipeline {
             source: ShaderSource::Wgsl(include_str!("shader.wgsl").into()),
         });
 
-        let texture_bind_group_layout =
-            device.create_bind_group_layout(&BindGroupLayoutDescriptor {
-                label: Some("webcam_bind_group_layout"),
-                entries: &[
-                    BindGroupLayoutEntry {
-                        binding: 0,
-                        visibility: ShaderStages::FRAGMENT,
-                        ty: BindingType::Texture {
-                            sample_type: TextureSampleType::Float { filterable: true },
-                            view_dimension: TextureViewDimension::D2,
-                            multisampled: false,
-                        },
-                        count: None,
+        let texture_bind_group_layout = device.create_bind_group_layout(
+            "webcam_bind_group_layout",
+            &[
+                BindGroupLayoutEntry {
+                    binding: 0,
+                    visibility: ShaderStages::FRAGMENT,
+                    ty: BindingType::Texture {
+                        sample_type: TextureSampleType::Float { filterable: true },
+                        view_dimension: TextureViewDimension::D2,
+                        multisampled: false,
                     },
-                    BindGroupLayoutEntry {
-                        binding: 1,
-                        visibility: ShaderStages::FRAGMENT,
-                        ty: BindingType::Sampler(SamplerBindingType::Filtering),
-                        count: None,
-                    },
-                ],
-            });
+                    count: None,
+                },
+                BindGroupLayoutEntry {
+                    binding: 1,
+                    visibility: ShaderStages::FRAGMENT,
+                    ty: BindingType::Sampler(SamplerBindingType::Filtering),
+                    count: None,
+                },
+            ],
+        );
 
         let render_pipeline_layout = device.create_pipeline_layout(&PipelineLayoutDescriptor {
             label: Some("Webcam Render Pipeline Layout"),
@@ -178,7 +178,7 @@ impl Node for BackgroundPassDriverNode {
         _render_context: &mut RenderContext,
         _world: &World,
     ) -> Result<(), NodeRunError> {
-        graph.run_sub_graph(BACKGROUND_GRAPH, vec![], Some(graph.view_entity()))?;
+        graph.run_sub_graph(BackgroundGraph, vec![], Some(graph.view_entity()))?;
 
         Ok(())
     }
@@ -276,28 +276,27 @@ impl Node for BackgroundNode {
                 ..Default::default()
             });
 
-            let texture_bind_group_layout =
-                device.create_bind_group_layout(&BindGroupLayoutDescriptor {
-                    entries: &[
-                        BindGroupLayoutEntry {
-                            binding: 0,
-                            visibility: ShaderStages::FRAGMENT,
-                            ty: BindingType::Texture {
-                                multisampled: false,
-                                view_dimension: TextureViewDimension::D2,
-                                sample_type: TextureSampleType::Float { filterable: true },
-                            },
-                            count: None,
+            let texture_bind_group_layout = device.create_bind_group_layout(
+                "texture_bind_group_layout",
+                &[
+                    BindGroupLayoutEntry {
+                        binding: 0,
+                        visibility: ShaderStages::FRAGMENT,
+                        ty: BindingType::Texture {
+                            multisampled: false,
+                            view_dimension: TextureViewDimension::D2,
+                            sample_type: TextureSampleType::Float { filterable: true },
                         },
-                        BindGroupLayoutEntry {
-                            binding: 1,
-                            visibility: ShaderStages::FRAGMENT,
-                            ty: BindingType::Sampler(SamplerBindingType::Filtering),
-                            count: None,
-                        },
-                    ],
-                    label: Some("texture_bind_group_layout"),
-                });
+                        count: None,
+                    },
+                    BindGroupLayoutEntry {
+                        binding: 1,
+                        visibility: ShaderStages::FRAGMENT,
+                        ty: BindingType::Sampler(SamplerBindingType::Filtering),
+                        count: None,
+                    },
+                ],
+            );
 
             let diffuse_bind_group = device.create_bind_group(
                 Some("diffuse_bind_group"),
@@ -319,11 +318,10 @@ impl Node for BackgroundNode {
             let pipeline = world.get_resource::<BackgroundPipeline>().unwrap();
             let pass_descriptor = RenderPassDescriptor {
                 label: Some("background_pass"),
-                color_attachments: &[Some(target.get_color_attachment(Operations {
-                    load: LoadOp::Load,
-                    store: true,
-                }))],
+                color_attachments: &[Some(target.get_color_attachment())],
                 depth_stencil_attachment: None,
+                timestamp_writes: None,
+                occlusion_query_set: None,
             };
 
             if let (Some(vertex_buffer), Some(index_buffer)) =

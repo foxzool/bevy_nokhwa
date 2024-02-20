@@ -83,10 +83,8 @@ impl BackgroundCamera {
             }
         });
 
-        let known_controls: BTreeMap<KnownCameraControl, CameraControl> = known_controls
-            .into_iter()
-            .map(|(k, control)| (k, control))
-            .collect();
+        let known_controls: BTreeMap<KnownCameraControl, CameraControl> =
+            known_controls.into_iter().collect();
 
         let controls = known_controls
             .iter()

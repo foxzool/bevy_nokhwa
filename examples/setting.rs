@@ -1,6 +1,5 @@
 extern crate core;
 
-use bevy::core_pipeline::clear_color::ClearColorConfig;
 use bevy::prelude::*;
 use bevy_egui::egui;
 use bevy_egui::{EguiContexts, EguiPlugin};
@@ -32,14 +31,10 @@ fn main() {
 fn setup_camera(mut commands: Commands) {
     commands
         .spawn(Camera3dBundle {
-            camera_3d: Camera3d {
-                clear_color: ClearColorConfig::None,
-                ..default()
-            },
             transform: Transform::from_xyz(-2.0, 2.5, 5.0).looking_at(Vec3::ZERO, Vec3::Y),
             ..Default::default()
         })
-        // auto find camera and use highest resolution
+        // auto find camera and use the highest resolution
         // .insert(BackgroundCamera::auto())
         .insert(
             BackgroundCamera::new(

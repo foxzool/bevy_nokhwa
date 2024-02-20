@@ -1,4 +1,3 @@
-use bevy::core_pipeline::clear_color::ClearColorConfig;
 use bevy::prelude::*;
 use bevy_nokhwa::camera::BackgroundCamera;
 use bevy_nokhwa::nokhwa::utils::ApiBackend;
@@ -31,14 +30,10 @@ fn setup_camera(
 ) {
     commands
         .spawn(Camera3dBundle {
-            camera_3d: Camera3d {
-                clear_color: ClearColorConfig::None,
-                ..default()
-            },
             transform: Transform::from_xyz(-2.0, 2.5, 5.0).looking_at(Vec3::ZERO, Vec3::Y),
             ..Default::default()
         })
-        // auto find camera and use highest resolution
+        // auto find camera and use the highest resolution
         // .insert(BackgroundCamera::auto())
         .insert(
             BackgroundCamera::new(
@@ -55,7 +50,7 @@ fn setup_camera(
 
     // cube
     commands.spawn(PbrBundle {
-        mesh: meshes.add(Mesh::from(shape::Cube { size: 1.0 })),
+        mesh: meshes.add(Cuboid::new(1.0, 1.0, 1.0)),
         material: materials.add(StandardMaterial {
             base_color: Color::SEA_GREEN,
             unlit: true,
