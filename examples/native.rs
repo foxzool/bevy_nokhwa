@@ -1,10 +1,11 @@
 use bevy::prelude::*;
+use nokhwa::utils::CameraIndex;
+
 use bevy_nokhwa::camera::BackgroundCamera;
 use bevy_nokhwa::nokhwa::utils::ApiBackend;
 use bevy_nokhwa::nokhwa::utils::FrameFormat;
 use bevy_nokhwa::nokhwa::utils::{CameraFormat, RequestedFormatType, Resolution};
 use bevy_nokhwa::BevyNokhwaPlugin;
-use nokhwa::utils::CameraIndex;
 
 fn main() {
     App::new()
@@ -52,7 +53,7 @@ fn setup_camera(
     commands.spawn(PbrBundle {
         mesh: meshes.add(Cuboid::new(1.0, 1.0, 1.0)),
         material: materials.add(StandardMaterial {
-            base_color: Color::SEA_GREEN,
+            base_color: bevy::color::palettes::css::SEA_GREEN.into(),
             unlit: true,
             ..default()
         }),

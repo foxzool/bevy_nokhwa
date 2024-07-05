@@ -128,11 +128,13 @@ impl FromWorld for BackgroundPipeline {
             vertex: RawVertexState {
                 module: &shader,
                 entry_point: "vs_main",
+                compilation_options: Default::default(),
                 buffers: &[Vertex::desc()],
             },
             fragment: Some(RawFragmentState {
                 module: &shader,
                 entry_point: "fs_main",
+                compilation_options: Default::default(),
                 targets: &[Some(ColorTargetState {
                     format: TextureFormat::bevy_default(),
                     blend: Some(BlendState {

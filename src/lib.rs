@@ -25,9 +25,9 @@ impl Plugin for BevyNokhwaPlugin {
 
         let render_app = app.sub_app_mut(RenderApp);
 
-        let background_node_2d = BackgroundNode::new(&mut render_app.world);
-        let background_node_3d = BackgroundNode::new(&mut render_app.world);
-        let mut render_graph = render_app.world.resource_mut::<RenderGraph>();
+        let background_node_2d = BackgroundNode::new(render_app.world_mut());
+        let background_node_3d = BackgroundNode::new(render_app.world_mut());
+        let mut render_graph = render_app.world_mut().resource_mut::<RenderGraph>();
 
         if let Some(graph_2d) =
             render_graph.get_sub_graph_mut(core_pipeline::core_2d::graph::Core2d)
@@ -36,7 +36,7 @@ impl Plugin for BevyNokhwaPlugin {
 
             graph_2d.add_node_edge(
                 BackgroundNodeLabel,
-                core_pipeline::core_2d::graph::Node2d::MainPass,
+                core_pipeline::core_2d::graph::Node2d::StartMainPass,
             );
         }
 
