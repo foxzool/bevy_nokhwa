@@ -1,5 +1,9 @@
 # Changes
 
+## [0.6.0] - 2024-07-05
+
+* bump bevy version to `0.14`
+
 ## [0.5.0] - 2024-02-20
 
 * bump bevy version to `0.13`
