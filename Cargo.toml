@@ -1,6 +1,6 @@
 [package]
 name = "bevy_nokhwa"
-version = "0.6.0"
+version = "0.7.0"
 description = "Nokhwa plugin for the bevy game engine"
 documentation = "https://docs.rs/bevy_nokhwa"
 repository = "https://github.com/foxzool/bevy_nokhwa"

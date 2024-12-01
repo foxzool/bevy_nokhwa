@@ -83,8 +83,7 @@ pub struct BackgroundPipeline {
 
 impl FromWorld for BackgroundPipeline {
     fn from_world(world: &mut World) -> Self {
-
-        let mut query = world.query_filtered::<&Msaa, With<Camera>>();
+        let mut query = world.query_filtered::<&Msaa, (With<Camera>, With<BackgroundCamera>)>();
         let msaa = match query.get_single(world) {
             Ok(m) => *m,
             Err(_) => Msaa::Sample4,
