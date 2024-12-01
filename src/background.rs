@@ -15,7 +15,6 @@ use bevy::render::render_resource::{
     TextureViewDimension, VertexAttribute, VertexFormat, VertexStepMode,
 };
 use bevy::render::renderer::{RenderContext, RenderDevice, RenderQueue};
-use bevy::render::texture::BevyDefault;
 use bevy::render::view::{ExtractedView, ViewTarget};
 use image::RgbaImage;
 
@@ -84,11 +83,14 @@ pub struct BackgroundPipeline {
 
 impl FromWorld for BackgroundPipeline {
     fn from_world(world: &mut World) -> Self {
-        let device = world.resource::<RenderDevice>();
-        let msaa = match world.get_resource::<Msaa>() {
-            None => Msaa::Sample4,
-            Some(msaa) => *msaa,
+
+        let mut query = world.query_filtered::<&Msaa, With<Camera>>();
+        let msaa = match query.get_single(world) {
+            Ok(m) => *m,
+            Err(_) => Msaa::Sample4,
         };
+        let device = world.resource::<RenderDevice>();
+
         let shader = device.create_shader_module(ShaderModuleDescriptor {
             label: Some("Webcam Shader"),
             source: ShaderSource::Wgsl(include_str!("shader.wgsl").into()),
@@ -127,13 +129,13 @@ impl FromWorld for BackgroundPipeline {
             layout: Some(&render_pipeline_layout),
             vertex: RawVertexState {
                 module: &shader,
-                entry_point: "vs_main",
+                entry_point: Some("vs_main"),
                 compilation_options: Default::default(),
                 buffers: &[Vertex::desc()],
             },
             fragment: Some(RawFragmentState {
                 module: &shader,
-                entry_point: "fs_main",
+                entry_point: Some("fs_main"),
                 compilation_options: Default::default(),
                 targets: &[Some(ColorTargetState {
                     format: TextureFormat::bevy_default(),
@@ -165,6 +167,7 @@ impl FromWorld for BackgroundPipeline {
             // If the pipeline will be used with a multiview render pass, this
             // indicates how many array layers the attachments will have.
             multiview: None,
+            cache: None,
         });
 
         Self { render_pipeline }

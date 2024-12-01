@@ -19,15 +19,14 @@ native = ["nokhwa/input-native"]
 
 [dependencies]
 anyhow = "1.0.66"
-bevy = { version = "0.14.0", default-features = false, features = ["bevy_render", "bevy_core_pipeline", "bevy_asset", "bevy_winit", "bevy_pbr", "x11", "png", "tonemapping_luts"] }
+bevy = { version = "0.15.0", default-features = false, features = ["bevy_render", "bevy_core_pipeline", "bevy_asset", "bevy_winit", "bevy_pbr", "x11", "png", "tonemapping_luts", "bevy_window"] }
 bytemuck = { version = "1.7.0" }
 flume = "0.11.0"
-image = { version = "=0.24", default-features = false, features = [] }
+image = { version = "0.25.5", default-features = false, features = [] }
 nokhwa = { version = "0.10", features = ["input-native", "output-threaded"] }
 
 [dev-dependencies]
-#bevy_egui = "0.25.0"
-bevy_egui = { git = "https://github.com/Friz64/bevy_egui", branch = "bevy-0.14" }
+bevy_egui = "0.31.1"
 
 
 
