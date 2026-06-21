@@ -23,8 +23,8 @@ use bevy_nokhwa::BevyNokhwaPlugin;
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
-        .add_plugin(BevyNokhwaPlugin)
-        .add_startup_system(setup_camera)
+        .add_plugins(BevyNokhwaPlugin)
+        .add_systems(Startup, setup_camera)
         .run();
 }
 
@@ -35,26 +35,24 @@ fn setup_camera(
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     commands
-        .spawn(Camera3dBundle {
-            camera_3d: Camera3d {
-                // IMPORTANT! Need to set clear_color to None
-                clear_color: ClearColorConfig::None,
-                ..default()
-            },
-            transform: Transform::from_xyz(-2.0, 2.5, 5.0).looking_at(Vec3::ZERO, Vec3::Y),
-            ..Default::default()
-        })
-        // auto find camera and use highest resolution 
+        .spawn((
+            Camera3d::default(),
+            Transform::from_xyz(-2.0, 2.5, 5.0).looking_at(Vec3::ZERO, Vec3::Y),
+        ))
+        // auto find camera and use highest resolution
         // .insert(BackgroundCamera::auto())
-        .insert(BackgroundCamera::new(
-            ApiBackend::Auto,
-            Some(CameraIndex::Index(0)),
-            Some(RequestedFormatType::Closest(CameraFormat::new(
-                Resolution::new(640, 480),
-                FrameFormat::MJPEG,
-                30,
-            ))),
-        ));
+        .insert(
+            BackgroundCamera::new(
+                ApiBackend::Auto,
+                Some(CameraIndex::Index(0)),
+                Some(RequestedFormatType::Closest(CameraFormat::new(
+                    Resolution::new(640, 480),
+                    FrameFormat::MJPEG,
+                    30,
+                ))),
+            )
+            .unwrap(),
+        );
 }
 ```
 
@@ -64,6 +62,7 @@ fn setup_camera(
 
 | bevy | bevy_nokhwa |
 |------|-------------|
+| 0.19 | 0.8         |
 | 0.15 | 0.7         |
 | 0.14 | 0.6         |
 | 0.13 | 0.5         |

@@ -1,10 +1,6 @@
 use bevy::prelude::*;
-use nokhwa::utils::CameraIndex;
 
 use bevy_nokhwa::camera::BackgroundCamera;
-use bevy_nokhwa::nokhwa::utils::ApiBackend;
-use bevy_nokhwa::nokhwa::utils::FrameFormat;
-use bevy_nokhwa::nokhwa::utils::{CameraFormat, RequestedFormatType, Resolution};
 use bevy_nokhwa::BevyNokhwaPlugin;
 
 fn main() {
@@ -12,7 +8,7 @@ fn main() {
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
                 title: "BevyNokhwa".to_string(),
-                resolution: [1280., 960.].into(),
+                resolution: [1280, 960].into(),
                 ..default()
             }),
             ..default()
@@ -34,20 +30,10 @@ fn setup_camera(
             Camera3d::default(),
             Transform::from_xyz(-2.0, 2.5, 5.0).looking_at(Vec3::ZERO, Vec3::Y),
         ))
-        // auto find camera and use the highest resolution
-        // .insert(BackgroundCamera::auto())
-        .insert(
-            BackgroundCamera::new(
-                ApiBackend::Auto,
-                Some(CameraIndex::Index(0)),
-                Some(RequestedFormatType::Closest(CameraFormat::new(
-                    Resolution::new(640, 480),
-                    FrameFormat::MJPEG,
-                    30,
-                ))),
-            )
-            .unwrap(),
-        );
+        // Let nokhwa pick a format the device actually supports
+        // (AbsoluteHighestFrameRate). On Apple Silicon cameras, fixed MJPEG
+        // 640x480@30 may be rejected with "Cannot fulfill request".
+        .insert(BackgroundCamera::auto().unwrap());
 
     // cube
     commands.spawn((

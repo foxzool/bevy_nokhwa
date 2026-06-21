@@ -4,11 +4,7 @@ use bevy::prelude::*;
 use bevy_egui::egui;
 use bevy_egui::{EguiContexts, EguiPlugin};
 use bevy_nokhwa::camera::{BackgroundCamera, CameraOperation};
-use bevy_nokhwa::nokhwa::utils::ApiBackend;
-use bevy_nokhwa::nokhwa::utils::FrameFormat;
-use bevy_nokhwa::nokhwa::utils::{CameraFormat, RequestedFormatType, Resolution};
 use bevy_nokhwa::BevyNokhwaPlugin;
-use nokhwa::utils::CameraIndex;
 use nokhwa::utils::ControlValueDescription;
 
 fn main() {
@@ -16,12 +12,12 @@ fn main() {
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
                 title: "Setting".to_string(),
-                resolution: [1280., 960.].into(),
+                resolution: [1280, 960].into(),
                 ..default()
             }),
             ..default()
         }))
-        .add_plugins(EguiPlugin)
+        .add_plugins(EguiPlugin::default())
         .add_plugins(BevyNokhwaPlugin)
         .add_systems(Startup, setup_camera)
         .add_systems(Update, dashboard)
@@ -34,27 +30,16 @@ fn setup_camera(mut commands: Commands) {
             Camera3d::default(),
             Transform::from_xyz(-2.0, 2.5, 5.0).looking_at(Vec3::ZERO, Vec3::Y),
         ))
-        // auto find camera and use the highest resolution
-        // .insert(BackgroundCamera::auto())
-        .insert(
-            BackgroundCamera::new(
-                ApiBackend::Auto,
-                Some(CameraIndex::Index(0)),
-                Some(RequestedFormatType::Closest(CameraFormat::new(
-                    Resolution::new(640, 480),
-                    FrameFormat::MJPEG,
-                    30,
-                ))),
-            )
-            .unwrap(),
-        );
+        // Let nokhwa pick a format the device actually supports. On Apple
+        // Silicon cameras, fixed MJPEG 640x480@30 may be rejected.
+        .insert(BackgroundCamera::auto().unwrap());
 }
 
 pub fn dashboard(mut egui_context: EguiContexts, mut q_camera: Query<&mut BackgroundCamera>) {
     let mut camera = q_camera.single_mut().unwrap();
     let known_controls = camera.known_controls.clone();
 
-    egui::Window::new("Camera Controls").show(egui_context.ctx_mut(), |ui| {
+    egui::Window::new("Camera Controls").show(egui_context.ctx_mut().unwrap(), |ui| {
         for (known_control, camera_control) in known_controls.iter() {
             ui.label(format!("{:?}", known_control));
             match camera_control.description() {

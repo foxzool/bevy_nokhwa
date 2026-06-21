@@ -1,13 +1,12 @@
 use crate::background::{
-    handle_background_image, BackgroundImage, BackgroundNode, BackgroundNodeLabel,
-    BackgroundPipeline,
+    handle_background_image, prepare_background, render_background, BackgroundBindGroup,
+    BackgroundImage, BackgroundPipeline,
 };
-use bevy::core_pipeline;
+use bevy::core_pipeline::{Core2d, Core2dSystems, Core3d, Core3dSystems};
 use bevy::prelude::*;
 use bevy::render::extract_resource::ExtractResourcePlugin;
-
-use bevy::render::render_graph::RenderGraph;
-use bevy::render::RenderApp;
+use bevy::render::render_resource::SpecializedRenderPipelines;
+use bevy::render::{GpuResourceAppExt, RenderApp};
 
 pub use nokhwa;
 
@@ -18,41 +17,32 @@ pub struct BevyNokhwaPlugin;
 
 impl Plugin for BevyNokhwaPlugin {
     fn build(&self, app: &mut App) {
+        // Register the embedded webcam shader so it can be loaded as a `Handle<Shader>`.
+        bevy::asset::embedded_asset!(app, "shader.wgsl");
+
         app.insert_resource(BackgroundImage(Image::default()))
             .add_plugins(ExtractResourcePlugin::<BackgroundImage>::default())
             .add_systems(Update, handle_background_image);
 
-        let render_app = app.sub_app_mut(RenderApp);
-
-        let background_node_2d = BackgroundNode::new(render_app.world_mut());
-        let background_node_3d = BackgroundNode::new(render_app.world_mut());
-        let mut render_graph = render_app.world_mut().resource_mut::<RenderGraph>();
-
-        if let Some(graph_2d) =
-            render_graph.get_sub_graph_mut(core_pipeline::core_2d::graph::Core2d)
-        {
-            graph_2d.add_node(BackgroundNodeLabel, background_node_2d);
-
-            graph_2d.add_node_edge(
-                BackgroundNodeLabel,
-                core_pipeline::core_2d::graph::Node2d::StartMainPass,
+        let Some(render_app) = app.get_sub_app_mut(RenderApp) else {
+            return;
+        };
+        render_app
+            .init_resource::<BackgroundBindGroup>()
+            .init_resource::<SpecializedRenderPipelines<BackgroundPipeline>>()
+            .init_gpu_resource::<BackgroundPipeline>()
+            // Draw the webcam background before the main pass for both 2d and 3d cameras.
+            .add_systems(
+                Core2d,
+                (prepare_background, render_background)
+                    .chain()
+                    .before(Core2dSystems::MainPass),
+            )
+            .add_systems(
+                Core3d,
+                (prepare_background, render_background)
+                    .chain()
+                    .before(Core3dSystems::MainPass),
             );
-        }
-
-        if let Some(graph_3d) =
-            render_graph.get_sub_graph_mut(core_pipeline::core_3d::graph::Core3d)
-        {
-            graph_3d.add_node(BackgroundNodeLabel, background_node_3d);
-
-            graph_3d.add_node_edge(
-                BackgroundNodeLabel,
-                core_pipeline::core_3d::graph::Node3d::MainTransparentPass,
-            );
-        }
-    }
-
-    fn finish(&self, app: &mut App) {
-        let render_app = app.sub_app_mut(RenderApp);
-        render_app.init_resource::<BackgroundPipeline>();
     }
 }
