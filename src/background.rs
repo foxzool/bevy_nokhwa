@@ -43,8 +43,7 @@ impl Vertex {
                     shader_location: 1,
                     format: VertexFormat::Float32x2,
                 },
-            ]
-            .into(),
+            ],
         }
     }
 }
