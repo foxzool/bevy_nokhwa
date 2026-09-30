@@ -23,6 +23,10 @@ jobs:
     needs: update
     steps:
       - uses: actions/checkout@v2
+      - name: Install Linux system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libasound2-dev libudev-dev pkg-config
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
@@ -73,6 +77,10 @@ jobs:
     needs: update
     steps:
       - uses: actions/checkout@v2
+      - name: Install Linux system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libasound2-dev libudev-dev pkg-config
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal

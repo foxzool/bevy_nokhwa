@@ -49,6 +49,7 @@ impl Vertex {
 }
 
 #[derive(Deref, DerefMut, Default, Resource, ExtractResource, Clone)]
+#[extract_app(bevy::render::RenderApp)]
 pub struct BackgroundImage(pub Image);
 
 const VERTICES: &[Vertex] = &[
@@ -152,12 +153,14 @@ impl SpecializedRenderPipeline for BackgroundPipeline {
             vertex: VertexState {
                 shader: self.shader.clone(),
                 shader_defs: vec![],
+                constants: default(),
                 entry_point: Some("vs_main".into()),
                 buffers: vec![Vertex::layout()],
             },
             fragment: Some(FragmentState {
                 shader: self.shader.clone(),
                 shader_defs: vec![],
+                constants: default(),
                 entry_point: Some("fs_main".into()),
                 targets: vec![Some(ColorTargetState {
                     format: key.format,
@@ -294,7 +297,7 @@ pub fn render_background(
 
     render_pass.set_pipeline(pipeline);
     render_pass.set_bind_group(0, bind_group, &[]);
-    // `Buffer::slice` returns Bevy's wrapper; dereference it to get the underlying `wgpu::BufferSlice`.
+    // Unwrap Bevy's BufferSlice for the raw wgpu render pass.
     render_pass.set_vertex_buffer(0, *background_pipeline.vertex_buffer.slice(..));
     render_pass.set_index_buffer(
         *background_pipeline.index_buffer.slice(..),
