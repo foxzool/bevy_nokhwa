@@ -1,0 +1,219 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  # Create GitHub release and publish to crates.io when tags are pushed
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v5.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Install stable toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libasound2-dev libudev-dev pkg-config
+
+      - name: Cache cargo registry
+        uses: actions/cache@v5.0.5
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+          key: ${{ runner.os }}-cargo-release-${{ hashFiles('**/Cargo.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-release-
+
+      - name: Cache cargo build
+        uses: actions/cache@v5.0.5
+        with:
+          path: target/
+          key: ${{ runner.os }}-cargo-release-build-${{ hashFiles('**/Cargo.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-release-build-
+
+      - name: Extract version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Verify version matches Cargo.toml
+        run: |
+          CARGO_VERSION=$(grep '^version = ' Cargo.toml | sed 's/version = "//' | sed 's/"//g')
+          if [ "$CARGO_VERSION" != "${{ steps.version.outputs.VERSION }}" ]; then
+            echo "Version mismatch: tag v${{ steps.version.outputs.VERSION }} vs Cargo.toml $CARGO_VERSION"
+            exit 1
+          fi
+          echo "✅ Version verified: $CARGO_VERSION"
+
+      - name: Run tests before release
+        run: cargo test --all-features
+
+      - name: Run clippy before release
+        run: cargo clippy --all-features -- -D warnings
+
+      - name: Check formatting before release
+        run: cargo fmt --all -- --check
+
+      - name: Check if this is a pre-release
+        id: prerelease_check
+        run: |
+          VERSION="${{ steps.version.outputs.VERSION }}"
+          if [[ "$VERSION" =~ (alpha|beta|rc) ]]; then
+            echo "prerelease=true" >> $GITHUB_OUTPUT
+          else
+            echo "prerelease=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Generate release notes
+        id: release_notes
+        run: |
+          # Get the previous tag
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+
+          # Generate changelog from commits
+          if [ -n "$PREV_TAG" ]; then
+            echo "## 🚀 bevy_nokhwa v${{ steps.version.outputs.VERSION }}" > release_notes.md
+            echo "" >> release_notes.md
+
+            # Get commits since last tag and categorize them
+            COMMITS=$(git log ${PREV_TAG}..HEAD --oneline --no-merges)
+
+            # Check for different types of changes
+            FEATURES=$(echo "$COMMITS" | grep -E "(feat|✨)" || true)
+            FIXES=$(echo "$COMMITS" | grep -E "(fix|🐛)" || true)
+            DOCS=$(echo "$COMMITS" | grep -E "(docs|📝)" || true)
+            CI=$(echo "$COMMITS" | grep -E "(ci|🚀|⬆️)" || true)
+            REFACTOR=$(echo "$COMMITS" | grep -E "(refactor|♻️)" || true)
+            SECURITY=$(echo "$COMMITS" | grep -E "(security|🔒|🛡️)" || true)
+            PERF=$(echo "$COMMITS" | grep -E "(perf|⚡)" || true)
+
+            echo "### What's Changed" >> release_notes.md
+            echo "" >> release_notes.md
+
+            if [ -n "$FEATURES" ]; then
+              echo "#### ✨ New Features" >> release_notes.md
+              echo "$FEATURES" | sed 's/^[a-f0-9]* /- /' >> release_notes.md
+              echo "" >> release_notes.md
+            fi
+
+            if [ -n "$SECURITY" ]; then
+              echo "#### 🔒 Security Improvements" >> release_notes.md
+              echo "$SECURITY" | sed 's/^[a-f0-9]* /- /' >> release_notes.md
+              echo "" >> release_notes.md
+            fi
+
+            if [ -n "$PERF" ]; then
+              echo "#### ⚡ Performance Improvements" >> release_notes.md
+              echo "$PERF" | sed 's/^[a-f0-9]* /- /' >> release_notes.md
+              echo "" >> release_notes.md
+            fi
+
+            if [ -n "$FIXES" ]; then
+              echo "#### 🐛 Bug Fixes" >> release_notes.md
+              echo "$FIXES" | sed 's/^[a-f0-9]* /- /' >> release_notes.md
+              echo "" >> release_notes.md
+            fi
+
+            if [ -n "$DOCS" ]; then
+              echo "#### 📝 Documentation" >> release_notes.md
+              echo "$DOCS" | sed 's/^[a-f0-9]* /- /' >> release_notes.md
+              echo "" >> release_notes.md
+            fi
+
+            if [ -n "$CI" ]; then
+              echo "#### 🚀 CI/CD Improvements" >> release_notes.md
+              echo "$CI" | sed 's/^[a-f0-9]* /- /' >> release_notes.md
+              echo "" >> release_notes.md
+            fi
+
+            if [ -n "$REFACTOR" ]; then
+              echo "#### ♻️ Code Improvements" >> release_notes.md
+              echo "$REFACTOR" | sed 's/^[a-f0-9]* /- /' >> release_notes.md
+              echo "" >> release_notes.md
+            fi
+
+            # Add remaining commits that don't match categories
+            OTHER=$(echo "$COMMITS" | grep -vE "(feat|fix|docs|ci|refactor|security|perf|✨|🐛|📝|🚀|♻️|🔒|🛡️|⚡|⬆️)" || true)
+            if [ -n "$OTHER" ]; then
+              echo "#### 🔧 Other Changes" >> release_notes.md
+              echo "$OTHER" | sed 's/^[a-f0-9]* /- /' >> release_notes.md
+              echo "" >> release_notes.md
+            fi
+
+          else
+            # Fallback for first release
+            cat > release_notes.md << 'EOF'
+          ## 🚀 bevy_nokhwa v${{ steps.version.outputs.VERSION }}
+
+          ### What's New
+          This is the initial release or a release without a previous tag for comparison.
+
+          ### Key Features
+          - 📷 **Camera capture** - Render a nokhwa camera as a Bevy background
+          - 🧩 **Plugin** - Drop-in `BevyNokhwaPlugin` for Bevy apps
+          EOF
+          fi
+
+          # Add installation and footer
+          cat >> release_notes.md << EOF
+
+          ### 📦 Installation
+          \`\`\`toml
+          [dependencies]
+          bevy_nokhwa = "${{ steps.version.outputs.VERSION }}"
+          \`\`\`
+
+          ### 🔗 Full Changelog
+          **Full Changelog**: https://github.com/foxzool/bevy_nokhwa/compare/${PREV_TAG}...v${{ steps.version.outputs.VERSION }}
+
+          ---
+          *Built with ❤️ using Bevy ECS*
+          EOF
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2.6.2
+        with:
+          tag_name: v${{ steps.version.outputs.VERSION }}
+          name: bevy_nokhwa v${{ steps.version.outputs.VERSION }}
+          body_path: release_notes.md
+          draft: false
+          prerelease: ${{ steps.prerelease_check.outputs.prerelease }}
+          files: |
+            target/release/bevy_nokhwa-*.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Clean up generated files before publish
+        run: rm -f release_notes.md
+
+      - name: Build release artifacts
+        run: cargo build --release
+
+      - name: Publish to crates.io
+        run: cargo publish --token ${{ secrets.CARGO_REGISTRY_TOKEN }}
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+
+      - name: Wait for crates.io index (with timeout)
+        run: |
+          echo "⏳ Waiting for crates.io to index the new version..."
+          timeout 300 bash -c 'until cargo search bevy_nokhwa --limit 1 | grep -q "${{ steps.version.outputs.VERSION }}"; do sleep 10; done' || echo "⚠️ Timeout waiting for crates.io indexing, but release should still be successful"
