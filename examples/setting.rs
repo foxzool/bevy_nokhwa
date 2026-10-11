@@ -51,7 +51,7 @@ pub fn dashboard(mut egui_context: EguiContexts, mut q_camera: Query<&mut Backgr
                         .changed()
                     {
                         let _ = camera.operation_tx.try_send(CameraOperation::Control {
-                            id: known_control.clone(),
+                            id: *known_control,
                             control: camera.controls.get(known_control).unwrap().clone(),
                         });
                     };
@@ -68,7 +68,7 @@ pub fn dashboard(mut egui_context: EguiContexts, mut q_camera: Query<&mut Backgr
                         .changed()
                     {
                         let _ = camera.operation_tx.try_send(CameraOperation::Control {
-                            id: known_control.clone(),
+                            id: *known_control,
                             control: camera.controls.get(known_control).unwrap().clone(),
                         });
                     };
@@ -81,7 +81,7 @@ pub fn dashboard(mut egui_context: EguiContexts, mut q_camera: Query<&mut Backgr
                         .changed()
                     {
                         let _ = camera.operation_tx.try_send(CameraOperation::Control {
-                            id: known_control.clone(),
+                            id: *known_control,
                             control: camera.controls.get(known_control).unwrap().clone(),
                         });
                     };
@@ -98,7 +98,7 @@ pub fn dashboard(mut egui_context: EguiContexts, mut q_camera: Query<&mut Backgr
                         .changed()
                     {
                         let _ = camera.operation_tx.try_send(CameraOperation::Control {
-                            id: known_control.clone(),
+                            id: *known_control,
                             control: camera.controls.get(known_control).unwrap().clone(),
                         });
                     };
@@ -112,7 +112,7 @@ pub fn dashboard(mut egui_context: EguiContexts, mut q_camera: Query<&mut Backgr
                         .changed()
                     {
                         let _ = camera.operation_tx.try_send(CameraOperation::Control {
-                            id: known_control.clone(),
+                            id: *known_control,
                             control: camera.controls.get(known_control).unwrap().clone(),
                         });
                     };
