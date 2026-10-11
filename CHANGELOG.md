@@ -1,5 +1,12 @@
 # Changes
 
+## [0.9.0] - 2026-10-11
+
+* bump bevy version to `0.20`
+* bump the `bevy_egui` dev-dependency to `0.43` (resolved `0.43.1`) for the settings example
+* extract `BackgroundImage` into the render app (`#[extract_app(RenderApp)]`)
+* set shader `constants` on the background pipeline's vertex and fragment states
+
 ## [0.8.0] - 2026-06-20
 
 * bump bevy version to `0.19`
